@@ -115,6 +115,11 @@ wlc_ioctl_hook(struct wlc_info *wlc, int cmd, char *arg, int len, void *wlc_if)
                         skb_pull(p, 8);
                         memcpy(p->data, frm->data, frm->len - 4);
                         skb_push(p, 8);
+                        // pkt_buf_get_skb() may hand back a reused buffer whose
+                        // length does not match what we actually filled in, so
+                        // trim it explicitly to avoid transmitting stale heap
+                        // data appended after our payload.
+                        p->len = frm->len + 4;
                     } else {
                         p = pkt_buf_get_skb(wlc->osh, frm->len + 202 - 4);
                         if (p == 0) {
@@ -123,6 +128,7 @@ wlc_ioctl_hook(struct wlc_info *wlc, int cmd, char *arg, int len, void *wlc_if)
                         skb_pull(p, 202);
 
                         memcpy(p->data, frm->data, frm->len - 4);
+                        p->len = frm->len - 4;
                     }
 
                     inject_frame(wlc, p);
