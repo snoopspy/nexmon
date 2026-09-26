@@ -82,6 +82,7 @@ static struct nexio *nexio = NULL;
 static const char *ifname = "wlan0";
 
 static int (*func_sendto) (int, const void *, size_t, int, const struct sockaddr *, socklen_t) = NULL;
+static int (*func_send) (int, const void *, size_t, int) = NULL;
 static int (*func_ioctl) (int, request_t, void *) = NULL;
 static int (*func_socket) (int, int, int) = NULL;
 static int (*func_bind) (int, const struct sockaddr *, int) = NULL;
@@ -105,6 +106,9 @@ static void _libmexmon_init() {
 
     if (! func_sendto)
         func_sendto = (int (*) (int, const void *, size_t, int, const struct sockaddr *, socklen_t)) dlsym (REAL_LIBC, "sendto");
+
+    if (! func_send)
+        func_send = (int (*) (int, const void *, size_t, int)) dlsym (REAL_LIBC, "send");
 }
 
 int
@@ -387,6 +391,38 @@ sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr
     } else {
         // otherwise write the regular frame to the socket
         ret = func_sendto(sockfd, buf, len, flags, dest_addr, addrlen);
+    }
+
+    return ret;
+}
+
+ssize_t
+send(int sockfd, const void *buf, size_t len, int flags)
+{
+    ssize_t ret;
+
+    // libpcap's pcap_inject/pcap_sendpacket uses send() on Linux (pcap_inject_linux).
+    // On modern bionic (Android >= 8, e.g. LineageOS 21) send() does not route back
+    // through the interposable sendto(), so it must be hooked explicitly, otherwise
+    // injected frames bypass the NEX_INJECT_FRAME ioctl path.
+
+    // check if the user wants to write on a raw socket
+    if ((sockfd > 2) && (sockfd < sizeof(socket_to_type)/sizeof(socket_to_type[0])) && (socket_to_type[sockfd] == SOCK_RAW) && (bound_to_correct_if[sockfd] == 1)) {
+        struct inject_frame *buf_dup = (struct inject_frame *) malloc(len + sizeof(struct inject_frame));
+
+        buf_dup->len = len + sizeof(struct inject_frame);
+        buf_dup->pad = 0;
+        buf_dup->type = 1;
+        memcpy(buf_dup->data, buf, len);
+
+        nex_ioctl(nexio, NEX_INJECT_FRAME, buf_dup, len + sizeof(struct inject_frame), true);
+
+        free(buf_dup);
+
+        ret = len;
+    } else {
+        // otherwise send the regular frame to the socket
+        ret = func_send(sockfd, buf, len, flags);
     }
 
     return ret;

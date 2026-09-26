@@ -460,6 +460,7 @@ AT(CHIP_VER_BCM4335b0, FW_VER_ALL, 0x12E94)
 // we use RAM locations as this function is overwritten by flashpatches
 AT(CHIP_VER_BCM43596a0, FW_VER_9_75_155_45_sta_c0, 0x162858)
 AT(CHIP_VER_BCM43596a0, FW_VER_9_96_4_sta_c0, 0x162BB8)
+AT(CHIP_VER_BCM43596a0, FW_VER_9_96_17_sta_c0, 0x162C0C) // printf (RE-confirmed)
 AT(CHIP_VER_BCM43451b1, FW_VER_ALL, 0x2504)
 AT(CHIP_VER_BCM43455, FW_VER_ALL, 0x3834)
 AT(CHIP_VER_BCM43455c0, FW_VER_ALL, 0x3834)
@@ -968,6 +969,7 @@ wl_sendup(void *wl, void *wlif, void *p)
 RETURN_DUMMY
 
 AT(CHIP_VER_BCM43596a0, FW_VER_9_96_4_sta_c0, 0x1624AC)
+AT(CHIP_VER_BCM43596a0, FW_VER_9_96_17_sta_c0, 0x1624C8) // wl_sendup (RE-confirmed via prologue match)
 AT(CHIP_VER_BCM43455c0, FW_VER_7_45_154, 0x1a2438)
 AT(CHIP_VER_BCM43455c0, FW_VER_7_45_189, 0x1A71BC)
 void
@@ -1585,6 +1587,7 @@ RETURN_DUMMY
 
 AT(CHIP_VER_BCM43596a0, FW_VER_9_75_155_45_sta_c0, 0x1727b4)
 AT(CHIP_VER_BCM43596a0, FW_VER_9_96_4_sta_c0, 0x172EAC)
+AT(CHIP_VER_BCM43596a0, FW_VER_9_96_17_sta_c0, 0x173D64) // wlc_phy_chan2freq_acphy (RE-confirmed)
 int
 wlc_phy_chan2freq_acphy_newdvr(void *pi, int chanspec, void **chan_info_ptr, int *xxx)
 RETURN_DUMMY
