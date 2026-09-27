@@ -7,7 +7,7 @@ libs/armeabi/libnexmon.so: Android.mk nexmon.c ../libnexio/local/armeabi/libnexi
 	cd ../libnexio && make
 
 install: libs/armeabi/libnexmon.so libs/arm64-v8a/libnexmon.so
-	adb shell 'su -c "mount -o rw,remount /system"'
+	adb shell 'su -c "mount -o rw,remount /"'
 	adb push libs/armeabi/libnexmon.so /sdcard/
 	adb shell 'su -c "cp /sdcard/libnexmon.so /system/lib/libnexmon.so"'
 	adb push libs/arm64-v8a/libnexmon.so /sdcard/
