@@ -170,12 +170,12 @@ test-firmware: fw_bcmdhd.bin
 	$(Q)adb shell 'su -c "dhdutil consoledump"'
 
 install-firmware: fw_bcmdhd.bin
-	@printf "\033[0;31m  REMOUNTING /system\033[0m\n"
-	$(Q)adb shell 'su -c "mount -o rw,remount /system"'
+	@printf "\033[0;31m  REMOUNTING /\033[0m\n"
+	$(Q)adb shell 'su -c "mount -o rw,remount /"'
 	@printf "\033[0;31m  COPYING TO PHONE\033[0m %s => /sdcard/%s\n" $< $<
 	$(Q)adb push $< /sdcard/ >> log/adb.log 2>> log/adb.log
-	@printf "\033[0;31m  COPYING\033[0m /sdcard/fw_bcmdhd.bin => /system/etc/wifi/bcmdhd_sta.bin_c0\n"
-	$(Q)adb shell 'su -c "cp /sdcard/fw_bcmdhd.bin /system/etc/wifi/bcmdhd_sta.bin_c0"'
+	@printf "\033[0;31m  COPYING\033[0m /sdcard/fw_bcmdhd.bin => /system/vendor/etc/wifi/bcmdhd_sta.bin_c0_plus_blob\n"
+	$(Q)adb shell 'su -c "cp /sdcard/fw_bcmdhd.bin /system/vendor/etc/wifi/bcmdhd_sta.bin_c0_plus_blob"'
 	@printf "\033[0;31m  RELOADING FIRMWARE\033[0m\n"
 	$(Q)adb shell 'su -c "ifconfig wlan0 down && ifconfig wlan0 up"'
 
@@ -209,13 +209,13 @@ install-original: $(FW_PATH)/$(RAM_FILE)
 	$(Q)adb shell 'su -c "ifconfig wlan0 down && ifconfig wlan0 up"'
 
 backup-firmware: FORCE
-	adb shell 'su -c "cp /system/etc/wifi/bcmdhd_sta.bin_c0 /sdcard/fw_bcmdhd.orig.bin"'
+	adb shell 'su -c "cp /system/vendor/etc/wifi/bcmdhd_sta.bin_c0_plus_blob /sdcard/fw_bcmdhd.orig.bin"'
 	adb pull /sdcard/fw_bcmdhd.orig.bin
 
 install-backup: fw_bcmdhd.orig.bin
-	adb shell 'su -c "mount -o rw,remount /system"' && \
+	adb shell 'su -c "mount -o rw,remount /"' && \
 	adb push $< /sdcard/ && \
-	adb shell 'su -c "cp /sdcard/fw_bcmdhd.orig.bin /system/etc/wifi/bcmdhd_sta.bin_c0"'
+	adb shell 'su -c "cp /sdcard/fw_bcmdhd.orig.bin /system/vendor/etc/wifi/bcmdhd_sta.bin_c0_plus_blob"'
 	adb shell 'su -c "ifconfig wlan0 down && ifconfig wlan0 up"'
 
 clean-firmware: FORCE
